@@ -42,26 +42,37 @@ function buildUrl(path: string, params: Record<string, string | number | boolean
   return `${guguConfig.baseUrl}${path}${suffix ? `?${suffix}` : ""}`;
 }
 
-async function request<T>(url: string): Promise<T[]> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new GuguApiError(`HTTP ${response.status}`, response.status);
+async function request<T>(url: string, timeoutMs = 8000): Promise<T[]> {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) {
+      throw new GuguApiError(`HTTP ${response.status}`, response.status);
+    }
+    const json = (await response.json()) as GuguResponse<T>;
+    if (json.DataStatus.StatusCode !== 100) {
+      throw new GuguApiError(
+        json.DataStatus.StatusDescription || "接口返回异常",
+        json.DataStatus.StatusCode,
+      );
+    }
+    const data = json.Data;
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data == null) {
+      return [];
+    }
+    return [data];
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new GuguApiError("请求超时，请稍后重试");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
   }
-  const json = (await response.json()) as GuguResponse<T>;
-  if (json.DataStatus.StatusCode !== 100) {
-    throw new GuguApiError(
-      json.DataStatus.StatusDescription || "接口返回异常",
-      json.DataStatus.StatusCode,
-    );
-  }
-  const data = json.Data;
-  if (Array.isArray(data)) {
-    return data;
-  }
-  if (data == null) {
-    return [];
-  }
-  return [data];
 }
 
 /** 按省份查询高校录取分数线（全国高校在该省的招生数据） */

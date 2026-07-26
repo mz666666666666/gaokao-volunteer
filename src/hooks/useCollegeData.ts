@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { provinces } from "../data/provinces";
 import { universities as localUniversities } from "../data/universities";
-import { getApiModeLabel, loadUniversitiesFromApi } from "../api/gugudata";
+import { getApiModeLabel, isDemoApiMode, loadUniversitiesFromApi } from "../api/gugudata";
 import type { DataSourceMode, StudentProfile, University } from "../types";
 
 interface UseCollegeDataResult {
@@ -27,7 +27,7 @@ export function useCollegeData(
   }, []);
 
   useEffect(() => {
-    if (source === "local") {
+    if (source === "local" || isDemoApiMode()) {
       setUniversities(localUniversities.map((item) => ({ ...item, dataSource: "local" })));
       setError(null);
       setLoading(false);

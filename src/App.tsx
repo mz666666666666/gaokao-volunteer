@@ -98,10 +98,24 @@ export default function App() {
   const filteredMajorOptions = useMemo(() => {
     const keyword = majorKeyword.trim().toLowerCase();
     if (!keyword) {
-      return majorOptions;
+      const popular = [
+        "计算机科学与技术",
+        "软件工程",
+        "人工智能",
+        "临床医学",
+        "会计学",
+        "法学",
+        "电子信息工程",
+        "土木工程",
+        "汉语言文学",
+        "英语",
+      ];
+      return [...new Set([...profile.preferredMajors, ...popular])];
     }
-    return majorOptions.filter((item) => item.toLowerCase().includes(keyword));
-  }, [majorKeyword]);
+    return majorOptions
+      .filter((item) => item.toLowerCase().includes(keyword))
+      .slice(0, 60);
+  }, [majorKeyword, profile.preferredMajors]);
 
   const addVolunteer = (
     universityId: string,
@@ -408,7 +422,10 @@ export default function App() {
               </span>
             </div>
             <div className="chip-group chip-group-scroll">
-              {filteredMajorOptions.length === 0 ? (
+              {!majorKeyword.trim() && (
+                <p className="major-hint">默认展示常见专业，输入关键词可搜索全部 {majorOptions.length} 个专业</p>
+              )}
+              {majorKeyword.trim() && filteredMajorOptions.length === 0 ? (
                 <div className="empty inline-empty">未找到匹配专业</div>
               ) : (
                 filteredMajorOptions.map((item) => (

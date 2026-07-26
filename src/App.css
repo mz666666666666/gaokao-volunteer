@@ -603,6 +603,13 @@ select:focus {
   flex: 1;
 }
 
+.major-hint {
+  width: 100%;
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #64748b;
+}
+
 .plan-context {
   margin: 8px 0 0;
   font-size: 13px;

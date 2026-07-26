@@ -9,7 +9,7 @@
       "destination": "https://api.gugudata.com/:path*"
     },
     {
-      "source": "/((?!assets/).*)",
+      "source": "/((?!assets/|teacher-meng\\.png|favicon\\.ico|vite\\.svg).*)",
       "destination": "/index.html"
     }
   ]

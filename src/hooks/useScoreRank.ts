@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchRankByScore } from "../api/gugudata";
+import { fetchRankByScore, isDemoApiMode } from "../api/gugudata";
 import { estimateRankByScore } from "../data/scoreRankTable";
 import type { DataSourceMode, StudentProfile } from "../types";
 
