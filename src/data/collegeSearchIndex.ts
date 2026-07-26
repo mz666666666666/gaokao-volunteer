@@ -1,16 +1,26 @@
 import type { University } from "../types";
-import { universities as localUniversities } from "./universities";
-import { nationalColleges } from "./nationalColleges.generated";
 
-/** 全国可搜索院校（推荐库 + 全国索引，去重） */
-export const searchableColleges: University[] = (() => {
+let searchableCache: University[] | null = null;
+
+/** 懒加载全国院校索引，减小首屏 JS 体积 */
+export async function loadSearchableColleges(): Promise<University[]> {
+  if (searchableCache) {
+    return searchableCache;
+  }
+
+  const [{ nationalColleges }, { universities: localUniversities }] = await Promise.all([
+    import("./nationalColleges.generated"),
+    import("./universities"),
+  ]);
+
   const map = new Map<string, University>();
   for (const item of [...localUniversities, ...nationalColleges]) {
     if (!map.has(item.id)) {
       map.set(item.id, item);
     }
   }
-  return Array.from(map.values());
-})();
+  searchableCache = Array.from(map.values());
+  return searchableCache;
+}
 
-export { nationalColleges };
+export const SEARCHABLE_COLLEGE_COUNT_HINT = "400+";

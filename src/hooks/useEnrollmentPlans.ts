@@ -5,7 +5,6 @@ import {
   loadEnrollmentPlansForSchool,
 } from "../api/gugudata";
 import { provinces } from "../data/provinces";
-import { queryLocalEnrollmentPlans } from "../data/nationwideEnrollmentPlans";
 import { filterEnrollmentPlansByTarget } from "../utils/enrollmentPlanFilter";
 import type { DataSourceMode, EnrollmentPlan } from "../types";
 
@@ -28,13 +27,14 @@ interface UseEnrollmentPlansResult {
   reload: () => void;
 }
 
-function loadLocalPlans(
+async function loadLocalPlans(
   queryProvinces: string[],
   options: Pick<
     UseEnrollmentPlansOptions,
     "schoolName" | "schoolUuid" | "majorKeyword" | "hotMajors"
   >,
-): EnrollmentPlan[] {
+): Promise<EnrollmentPlan[]> {
+  const { queryLocalEnrollmentPlans } = await import("../data/nationwideEnrollmentPlans");
   return queryProvinces.flatMap((provinceName) =>
     queryLocalEnrollmentPlans({
       provinceName,
@@ -86,9 +86,8 @@ export function useEnrollmentPlans(
       setError(null);
 
       try {
-        // Demo 接口忽略学校/省份参数，固定返回样例数据，必须走本地库
         if (useLocalPlans) {
-          const list = loadLocalPlans(queryProvinces, {
+          const list = await loadLocalPlans(queryProvinces, {
             schoolName,
             schoolUuid,
             majorKeyword,
@@ -96,9 +95,6 @@ export function useEnrollmentPlans(
           });
           if (!cancelled) {
             setPlans(list);
-            if (isDemoApiMode() && source === "api") {
-              setError(null);
-            }
           }
           return;
         }
@@ -124,7 +120,12 @@ export function useEnrollmentPlans(
         const finalList =
           filtered.length > 0
             ? filtered
-            : loadLocalPlans(queryProvinces, { schoolName, schoolUuid, majorKeyword, hotMajors });
+            : await loadLocalPlans(queryProvinces, {
+                schoolName,
+                schoolUuid,
+                majorKeyword,
+                hotMajors,
+              });
 
         if (!cancelled) {
           setPlans(finalList);
@@ -135,7 +136,14 @@ export function useEnrollmentPlans(
         }
         const message = err instanceof Error ? err.message : "加载招生计划失败";
         setError(message);
-        setPlans(loadLocalPlans(queryProvinces, { schoolName, schoolUuid, majorKeyword, hotMajors }));
+        setPlans(
+          await loadLocalPlans(queryProvinces, {
+            schoolName,
+            schoolUuid,
+            majorKeyword,
+            hotMajors,
+          }),
+        );
       } finally {
         if (!cancelled) {
           setLoading(false);

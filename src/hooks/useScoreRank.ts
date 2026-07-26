@@ -34,7 +34,7 @@ export function useScoreRank(options: UseScoreRankOptions): UseScoreRankResult {
     async function syncRank() {
       setLoading(true);
       try {
-        if (source === "local") {
+        if (source === "local" || isDemoApiMode()) {
           const local = estimateRankByScore(score, province, subjectType);
           if (!cancelled) {
             setRank(local.rank);

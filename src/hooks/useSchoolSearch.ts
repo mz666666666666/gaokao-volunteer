@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { searchCollegesByKeyword } from "../api/gugudata";
-import { searchableColleges } from "../data/collegeSearchIndex";
+import { loadSearchableColleges } from "../data/collegeSearchIndex";
 import { mergeSearchResults, searchUniversities } from "../utils/search";
 import type { DataSourceMode, StudentProfile, University } from "../types";
 
@@ -26,6 +26,7 @@ export function useSchoolSearch({
   enabled = true,
 }: UseSchoolSearchOptions): UseSchoolSearchResult {
   const [remoteResults, setRemoteResults] = useState<University[]>([]);
+  const [indexResults, setIndexResults] = useState<University[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,11 +36,35 @@ export function useSchoolSearch({
     if (!trimmedKeyword) {
       return [];
     }
-    return mergeSearchResults(
-      searchUniversities(baseUniversities, trimmedKeyword),
-      searchUniversities(searchableColleges, trimmedKeyword),
-    );
+    return searchUniversities(baseUniversities, trimmedKeyword);
   }, [baseUniversities, trimmedKeyword]);
+
+  useEffect(() => {
+    if (!enabled || trimmedKeyword.length < 1) {
+      setIndexResults([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function searchIndex() {
+      try {
+        const colleges = await loadSearchableColleges();
+        if (!cancelled) {
+          setIndexResults(searchUniversities(colleges, trimmedKeyword));
+        }
+      } catch {
+        if (!cancelled) {
+          setIndexResults([]);
+        }
+      }
+    }
+
+    void searchIndex();
+    return () => {
+      cancelled = true;
+    };
+  }, [enabled, trimmedKeyword]);
 
   useEffect(() => {
     if (!enabled || trimmedKeyword.length < 1) {
@@ -84,8 +109,8 @@ export function useSchoolSearch({
   }, [enabled, trimmedKeyword, profile.province, profile.subjectType, dataSource]);
 
   const results = useMemo(
-    () => mergeSearchResults(localResults, remoteResults).slice(0, 80),
-    [localResults, remoteResults],
+    () => mergeSearchResults(localResults, indexResults, remoteResults).slice(0, 80),
+    [localResults, indexResults, remoteResults],
   );
 
   return { results, loading, error };

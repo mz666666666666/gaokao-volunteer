@@ -1,4 +1,4 @@
-import type { EnrollmentPlan } from "../types";
+import type { EnrollmentPlan, University } from "../types";
 import { GAOKAO_DATA_YEAR } from "../constants/gaokao";
 import { provinces } from "./provinces";
 import { nationalColleges } from "./nationalColleges.generated";
@@ -16,7 +16,7 @@ const templateMajors = [
   { name: "临床医学", code: "100201", classTwo: "临床医学类", classOne: "医学" },
 ];
 
-function resolveCollege(schoolUuid?: string, schoolName?: string) {
+function resolveCollege(schoolUuid?: string, schoolName?: string): University | undefined {
   if (schoolUuid) {
     const byId = nationalColleges.find((item) => item.id === schoolUuid);
     if (byId) {
@@ -59,7 +59,8 @@ export function buildSchoolTemplatePlans(options: {
 
   return majorNames.slice(0, 6).map((majorName, index) => {
     const template =
-      templateMajors.find((item) => item.name === majorName) ?? templateMajors[index % templateMajors.length];
+      templateMajors.find((item) => item.name === majorName) ??
+      templateMajors[index % templateMajors.length];
     return {
       id: `tpl-${schoolUuid}-${template.code}-${options.enrollProvince}-${index}`,
       schoolUuid,
@@ -84,7 +85,6 @@ export function buildSchoolTemplatePlans(options: {
   });
 }
 
-/** 为指定省份生成本地演示招生计划（该省全部院校，用于招生计划 Tab） */
 function buildProvinceTemplatePlans(provinceName: string): EnrollmentPlan[] {
   const colleges = nationalColleges.filter((item) => item.province === provinceName);
   return colleges.flatMap((college) =>
@@ -145,7 +145,6 @@ export function queryLocalEnrollmentPlans(options: {
   return filterEnrollmentPlansByTarget(list, { majorKeyword: options.majorKeyword });
 }
 
-/** 校验计划列表是否都属于同一院校（防止 Demo API 串校） */
 export function assertPlansBelongToSchool(
   plans: EnrollmentPlan[],
   options: { schoolName?: string; schoolUuid?: string },
@@ -156,7 +155,6 @@ export function assertPlansBelongToSchool(
   return plans.every((plan) => matchEnrollmentPlanToSchool(plan, options));
 }
 
-/** 导出全部省份计划缓存键，用于 UI 展示同步范围 */
 export function getNationwidePlanProvinces(): string[] {
   return [...provinces];
 }

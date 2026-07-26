@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { majorOptions, provinces } from "./data/universities";
+import { provinces } from "./data/universities";
 import { EnrollmentPlanTable } from "./components/EnrollmentPlanTable";
 import { SchoolSearchPanel } from "./components/SchoolSearchPanel";
 import { MatchMajorGroups } from "./components/MatchMajorGroups";
@@ -45,13 +45,35 @@ export default function App() {
   const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
   const [volunteers, setVolunteers] = useState<VolunteerItem[]>([]);
   const [activeTab, setActiveTab] = useState<TabKey>("profile");
-  const [dataSource, setDataSource] = useState<DataSourceMode>("api");
+  const [dataSource, setDataSource] = useState<DataSourceMode>("local");
   const [planSchoolKeyword, setPlanSchoolKeyword] = useState("");
   const [planMajorKeyword, setPlanMajorKeyword] = useState("");
   const [planProvince, setPlanProvince] = useState("");
   const [manualRank, setManualRank] = useState(false);
   const [majorKeyword, setMajorKeyword] = useState("");
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [majorOptions, setMajorOptions] = useState<string[]>([]);
+  const [majorsLoading, setMajorsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    import("./data/majors")
+      .then((module) => {
+        if (!cancelled) {
+          setMajorOptions(module.majorOptions);
+          setMajorsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMajorOptions(["计算机科学与技术", "软件工程", "会计学"]);
+          setMajorsLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const planProvinces = usePlanProvinces(profile);
   const activePlanProvince = planProvince || profile.province;
@@ -417,8 +439,12 @@ export default function App() {
                 placeholder="搜索专业，如：计算机、护理、会计"
               />
               <span className="major-count">
-                共 {majorOptions.length} 个专业
-                {majorKeyword.trim() ? `，匹配 ${filteredMajorOptions.length} 个` : ""}
+                {majorsLoading
+                  ? "专业库加载中..."
+                  : `共 ${majorOptions.length} 个专业`}
+                {majorKeyword.trim() && !majorsLoading
+                  ? `，匹配 ${filteredMajorOptions.length} 个`
+                  : ""}
               </span>
             </div>
             <div className="chip-group chip-group-scroll">

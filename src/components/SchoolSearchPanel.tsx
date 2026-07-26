@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { SchoolEnrollmentPlans } from "./SchoolEnrollmentPlans";
 import { useSchoolSearch } from "../hooks/useSchoolSearch";
 import { resolveSchoolWebsite } from "../data/schoolWebsites";
-import { searchableColleges } from "../data/collegeSearchIndex";
+import { SEARCHABLE_COLLEGE_COUNT_HINT } from "../data/collegeSearchIndex";
 import { resolveBatchLevel } from "../utils/batch";
 import { GAOKAO_DATA_YEAR } from "../constants/gaokao";
 import type { DataSourceMode, EnrollmentPlan, StudentProfile, University } from "../types";
@@ -59,7 +59,7 @@ export function SchoolSearchPanel({
       <div className="search-hero">
         <div>
           <h2>院校查询</h2>
-          <p>输入学校名称，支持简称/模糊搜索全国 {searchableColleges.length}+ 所院校，查看 {GAOKAO_DATA_YEAR} 年分数线与招生计划</p>
+          <p>输入学校名称，支持简称/模糊搜索全国 {SEARCHABLE_COLLEGE_COUNT_HINT} 所院校，查看 {GAOKAO_DATA_YEAR} 年分数线与招生计划</p>
         </div>
         <div className="search-box">
           <input
