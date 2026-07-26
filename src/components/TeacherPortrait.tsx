@@ -4,7 +4,7 @@ interface TeacherPortraitProps {
 }
 
 export function TeacherPortrait({
-  src = "/teacher-meng.png",
+  src = `${import.meta.env.BASE_URL}teacher-meng.png`,
   alt = "孟老师",
 }: TeacherPortraitProps) {
   return (
