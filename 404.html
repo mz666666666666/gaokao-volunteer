@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>高考志愿填报助手</title>
+    <style>
+      #boot-loading {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 24px;
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        background: linear-gradient(135deg, #eff6ff, #f5f3ff);
+        color: #334155;
+        text-align: center;
+      }
+      #boot-loading strong {
+        font-size: 22px;
+        color: #1d4ed8;
+      }
+      #boot-loading p {
+        margin: 0;
+        line-height: 1.7;
+        max-width: 420px;
+      }
+      .boot-spinner {
+        width: 42px;
+        height: 42px;
+        border: 4px solid #dbeafe;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      #boot-fallback {
+        display: none;
+        margin-top: 8px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+      }
+      #boot-fallback a {
+        color: #2563eb;
+      }
+    </style>
+    <script type="module" crossorigin src="/gaokao-volunteer/assets/index-9BZhChTj.js"></script>
+    <link rel="stylesheet" crossorigin href="/gaokao-volunteer/assets/index-3yKB856Q.css">
+  </head>
+  <body>
+    <div id="root">
+      <div id="boot-loading">
+        <div class="boot-spinner"></div>
+        <strong>高考志愿填报助手</strong>
+        <p>正在加载，请稍候…</p>
+        <div id="boot-fallback">
+          <p>若长时间空白，可能是 <b>Vercel</b> 在国内访问较慢或被拦截。</p>
+          <p>请尝试 GitHub Pages 地址：<a id="gh-link" href="#">点击打开</a></p>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var fallback = document.getElementById("boot-fallback");
+        var ghLink = document.getElementById("gh-link");
+        var ghUrl = "https://mz666666666666.github.io/gaokao-volunteer/";
+        if (ghLink) ghLink.href = ghUrl;
+        setTimeout(function () {
+          if (fallback) fallback.style.display = "block";
+        }, 5000);
+      })();
+    </script>
+  </body>
+</html>
