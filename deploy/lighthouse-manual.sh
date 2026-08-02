@@ -51,7 +51,9 @@ fi
 
 # 若尚未 include，则注入
 if ! grep -qF 'snippets/gaokao-volunteer.conf' "$TARGET"; then
-  cp "$TARGET" "${TARGET}.bak.$(date +%s)"
+  # 备份必须放在 sites-enabled 外，否则会被 Nginx 当作正式配置加载
+  mkdir -p /root/nginx-backups
+  cp "$TARGET" "/root/nginx-backups/life-energy-api.bak.$(date +%s)"
   awk '
     /server[[:space:]]*\{/ && !done {
       print
@@ -66,6 +68,9 @@ if ! grep -qF 'snippets/gaokao-volunteer.conf' "$TARGET"; then
 else
   echo "==> 片段已存在，跳过注入"
 fi
+
+# 清理误放在 sites-enabled 里的备份文件
+find /etc/nginx/sites-enabled -maxdepth 1 \( -name '*.bak' -o -name '*.bak.*' -o -name '*.tmp' \) -delete
 
 echo "==> 当前 default_server 分布："
 grep -Rn "default_server" /etc/nginx/sites-enabled/ || true

@@ -88,6 +88,8 @@ else
     echo "==> 已在 $TARGET 中包含片段，跳过注入"
   else
     echo "==> 注入片段到 $TARGET"
+    mkdir -p /root/nginx-backups
+    cp "$TARGET" "/root/nginx-backups/$(basename "$TARGET").bak.$(date +%s)"
     # 在第一个 server { 后插入 include
     awk -v line="    $INCLUDE_LINE" '
       BEGIN { done=0 }
@@ -102,6 +104,9 @@ else
     mv "${TARGET}.tmp" "$TARGET"
   fi
 fi
+
+# 清理误放在 sites-enabled 里的备份（Nginx 会加载目录下所有文件）
+find /etc/nginx/sites-enabled -maxdepth 1 \( -name '*.bak' -o -name '*.bak.*' -o -name '*.tmp' \) -delete
 
 nginx -t
 systemctl reload nginx
